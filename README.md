@@ -10,9 +10,9 @@ pip install -r requirements.txt
    
 ```json
 {
-    "bucket_name": "sankir-1705",
-    "input_path": "retail/input/2010-12-01.csv",
-    "output_path": "retail/processed"
+    "bucket_name": "sankir-storage-prospark",
+    "input_path": "raw-retail-data/2010-12-01.csv",
+    "output_path": "processed-retail-data/"
 }
 ```
 
@@ -24,5 +24,5 @@ export GOOGLE_APPLICATION_CREDENTIALS=/path/to/creds.json
 4. Run the script with
 
 ```bash
-python batch.py /path/to/config.json
+python3 batch.py /path/to/config.json
 ```
