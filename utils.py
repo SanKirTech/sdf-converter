@@ -44,4 +44,4 @@ def process(data, metadata):
     for row in parsed_data:
         updated_data.append({"_m": metadata, "_p": {"data": row}})
 
-    return json.dumps(updated_data)
+    return updated_data

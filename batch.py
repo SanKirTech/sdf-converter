@@ -1,7 +1,8 @@
 import os
 import sys
+import json
 
-from google.cloud import storage
+from google.cloud import storage, bigquery
 
 from utils import (
     get_config,
@@ -35,15 +36,37 @@ if __name__ == "__main__":
     bucket = client.get_bucket(bucket_name)
     blob = bucket.get_blob(input_path)
     file_contents = blob.download_as_string()
-    # src_dtls = "gs://"+bucket_name+"/"+input_path
+    
+    src = "gcs"
+    src_dtls = blob.public_url
 
-    metadata = {"_rt": get_time(), "_src": "gcs", "_o": "", "src_dtls": blob.public_url}
+    # TODO: change the received timestamp to be fetched from metadata for blob
+    received_timestamp = get_time()
+    processed_time = get_time()
+
+    metadata = {"_rt": received_timestamp, "_src": src, "_o": "", "src_dtls": src_dtls}
 
     filename = get_filename_without_extension(blob.name)
+    
     processed_data = process(file_contents, metadata)
 
     # Create destination blob
     blob = bucket.blob(get_output_path(input_path, output_path))
-    blob.upload_from_string(processed_data, content_type="application/json")
+    blob.upload_from_string(json.dumps(processed_data), content_type="application/json")
+
+    # Update bigquery table
+    bqclient = bigquery.Client()
+    table = 'recon.reconciliation'
+
+    record_count = len(processed_data)
+
+    data = [{
+        "src" : src,
+        "src_dtls": src_dtls,
+        "record_count": record_count,
+        "received_timestamp": get_time(),
+        "processed_time": get_time(),
+    }]
+    bqclient.insert_rows_json(table, data)
 
     print("Success!")

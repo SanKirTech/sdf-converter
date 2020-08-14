@@ -1,6 +1,6 @@
 
 {
-    "bucket_name":"sankir-1705",
-    "input_path":"retail/input/2010-12-01.csv",
-    "output_path":"retail/processed"
+    "bucket_name":"sankir-storage-prospark",
+    "input_path":"raw-retail-data/2011-01-04.csv",
+    "output_path":"processed-retail-data/"
 }
