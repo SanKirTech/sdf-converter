@@ -44,7 +44,7 @@ class SDF:
         # Create destination blob
         dest_blob = bucket.blob(get_output_path(self.input_path, self.output_path))
         dest_blob.upload_from_string(
-            json.dumps(self.processed_data), content_type="application/json"
+            SDF.custom_json_dump(self.processed_data), content_type="application/json"
         )
         return True
 
@@ -73,6 +73,14 @@ class SDF:
             updated_data.append({"_m": metadata, "_p": {"data": row}})
 
         return updated_data
+
+    @staticmethod
+    def custom_json_dump(processed_data):
+        """
+        Takes in processed data and returns a custom JSON format with
+        each line representing valid JSON.
+        """
+        return "\n".join(list(map(json.dumps,  processed_data)))
 
     def run(self):
         res = self.update_storage()
