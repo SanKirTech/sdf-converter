@@ -8,21 +8,22 @@ from utils import get_fields, get_time, get_output_path
 
 
 class SDF:
-    def __init__(self, config):
+    def __init__(self, config, blob, storage_client, bigquery_client):
         self.config = config
         self.input_path = config["input_path"]
         self.output_path = config["output_path"]
         self.bucket_name = config["bucket_name"]
+        self.blob = blob
+
         self.table_name = config["bigquery_table_name"]
         self.reprocess = config.get("reprocess", False)
         self.src = "gcs"
-        self.storage_client = storage.Client()
-        self.bigquery_client = bigquery.Client()
+
+        self.storage_client = storage_client
+        self.bigquery_client = bigquery_client
 
     def update_storage(self):
         bucket = self.storage_client.get_bucket(self.bucket_name)
-        self.blob = bucket.get_blob(self.input_path)
-
         if self.blob is None:
             logging.error(f"input_path: {self.input_path} does not exist")
             return
@@ -49,7 +50,7 @@ class SDF:
         self.processed_data = SDF.process(file_contents, metadata)
 
         # Create destination blob
-        dest_blob = bucket.blob(get_output_path(self.input_path, self.output_path))
+        dest_blob = bucket.blob(get_output_path(self.blob.name, self.output_path))
         dest_blob.upload_from_string(
             SDF.custom_json_dump(self.processed_data), content_type="application/json"
         )

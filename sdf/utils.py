@@ -19,8 +19,8 @@ def get_filename(path):
     return os.path.splitext(os.path.basename(path))[0]
 
 
-def get_output_path(input_path, output_path):
-    filename = get_filename(input_path)
+def get_output_path(blob_name, output_path):
+    filename = get_filename(blob_name)
     op_path = os.path.join(output_path, f"{filename}.json")
     print(f"Writing to {op_path}")
     return op_path
