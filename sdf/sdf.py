@@ -1,6 +1,7 @@
 import io
-import csv
+import pandas
 import json
+import logging
 from google.cloud import storage, bigquery
 
 from utils import get_fields, get_time, get_output_path
@@ -13,6 +14,7 @@ class SDF:
         self.output_path = config["output_path"]
         self.bucket_name = config["bucket_name"]
         self.table_name = config["bigquery_table_name"]
+        self.reprocess = config.get("reprocess", False)
         self.src = "gcs"
         self.storage_client = storage.Client()
         self.bigquery_client = bigquery.Client()
@@ -21,14 +23,19 @@ class SDF:
         bucket = self.storage_client.get_bucket(self.bucket_name)
         self.blob = bucket.get_blob(self.input_path)
 
+        if self.blob is None:
+            logging.error(f"input_path: {self.input_path} does not exist")
+            return
+
         # Check if blob has already been processed in the bigquery db
-        if list(
+        present_in_recon = bool(list(
             self.bigquery_client.query(
                 f"""SELECT src_dtls from `pro-spark.recon.reconciliation` where src_dtls = "{self.blob.public_url}" """
             )
-        ):
+        ))
+        if not self.reprocess and present_in_recon:
             print("File already processed. Skipping...")
-            return False
+            return
 
         file_contents = self.blob.download_as_string()
 
@@ -66,12 +73,11 @@ class SDF:
     def process(data, metadata):
         f = io.StringIO(data.decode("utf-8"))
         fields = get_fields(data)
-        parsed_data = list(csv.DictReader(f, fields))[1:]
+        parsed_data = pandas.read_csv(f)
 
         updated_data = list()
-        for row in parsed_data:
-            updated_data.append({"_m": metadata, "_p": {"data": row}})
-
+        for idx, row in parsed_data.iterrows():
+            updated_data.append({"_m": metadata, "_p": {"data": dict(row)}})
         return updated_data
 
     @staticmethod

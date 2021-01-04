@@ -1,7 +1,8 @@
 
 {
     "bucket_name":"sankir-storage-prospark",
-    "input_path":"raw-retail-data/2010-12-12.csv",
+    "input_path":"raw-retail-data/custidnull.csv",
     "output_path":"processed-retail-data/",
-    "bigquery_table_name": "recon.reconciliation"
+    "bigquery_table_name": "recon.reconciliation",
+    "reprocess": true
 }
