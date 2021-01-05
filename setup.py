@@ -15,7 +15,7 @@ requirements = read(os.path.join(os.path.dirname(__file__), "requirements.txt"))
 
 setuptools.setup(
     name="sankir-sdf",
-    version="0.0.1",
+    version="0.0.2",
     author="SanKir Technologies Pvt Ltd",
     author_email="sanjay@sankir.com",
     description="SDF Converter",
