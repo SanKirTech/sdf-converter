@@ -4,7 +4,7 @@ import json
 
 from google.cloud import storage, bigquery
 
-from .utils import get_config
+from utils import get_config
 from sdf import SDF
 
 if __name__ == "__main__":
