@@ -1,10 +1,24 @@
 import setuptools
 import os
 
+local_path = os.path.dirname(__file__)
+# Fix for tox which manipulates execution pathing
+if not local_path:
+    local_path = '.'
+here = os.path.abspath(local_path)
+
 
 def read(fname):
     with open(fname, 'r') as fhandle:
         return fhandle.read()
+
+
+def version():
+    with open(here + '/sdf/_version.py', 'r') as ver:
+        for line in ver.readlines():
+            if line.startswith('version ='):
+                return line.split(' = ')[-1].strip()[1:-1]
+    raise ValueError('No version found in sdf/_version.py')
 
 
 with open("README.md", "r", encoding="utf-8") as fh:
@@ -15,7 +29,7 @@ requirements = read(os.path.join(os.path.dirname(__file__), "requirements.txt"))
 
 setuptools.setup(
     name="sankir-sdf",
-    version="0.0.2",
+    version=version(),
     author="SanKir Technologies Pvt Ltd",
     author_email="sanjay@sankir.com",
     description="SDF Converter",
