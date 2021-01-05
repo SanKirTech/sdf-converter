@@ -1,7 +1,17 @@
 import setuptools
+import os
+
+
+def read(fname):
+    with open(fname, 'r') as fhandle:
+        return fhandle.read()
+
 
 with open("README.md", "r", encoding="utf-8") as fh:
     long_description = fh.read()
+
+requirements = read(os.path.join(os.path.dirname(__file__), "requirements.txt"))
+
 
 setuptools.setup(
     name="sankir-sdf",
@@ -23,5 +33,6 @@ setuptools.setup(
             "sankir-sdf=sdf.__main__:main"
         ]
     },
+    install_requires=requirements,
     python_requires='>=3.6',
 )
