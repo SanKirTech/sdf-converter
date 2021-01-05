@@ -4,13 +4,17 @@ import json
 
 from google.cloud import storage, bigquery
 
-from utils import get_config
-from sdf import SDF
+from sdf.utils import get_config
+from sdf.sdf import SDF
 
-if __name__ == "__main__":
+def main():
     # Check if env variable is set
-    if not os.environ["GOOGLE_APPLICATION_CREDENTIALS"]:
+    if not os.environ.get("GOOGLE_APPLICATION_CREDENTIALS"):
         print("Please set 'GOOGLE_APPLICATION_CREDENTIALS' environment variable")
+        os._exit(-1)
+
+    if len(sys.argv) < 2:
+        print("Provide path to config.json as argument.")
         os._exit(-1)
 
     config = get_config(sys.argv[1])
@@ -27,3 +31,7 @@ if __name__ == "__main__":
         print(f"Processing {index + 1} of {len(all_blobs)}: {blob.name}")
         sdf = SDF(config, blob, storage_client, bigquery_client)
         sdf.run()
+
+
+if __name__ == "__main__":
+    main()

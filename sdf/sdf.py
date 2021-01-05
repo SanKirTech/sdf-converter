@@ -4,7 +4,7 @@ import json
 import logging
 from google.cloud import storage, bigquery
 
-from utils import get_fields, get_time, get_output_path
+from sdf.utils import get_fields, get_time, get_output_path
 
 
 class SDF:
