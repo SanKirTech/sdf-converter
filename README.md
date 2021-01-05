@@ -11,7 +11,7 @@ pip install -r requirements.txt
 ```json
 {
     "bucket_name": "sankir-storage-prospark",
-    "input_path": "raw-retail-data/2010-12-01.csv",
+    "input_path": "raw-retail-data/q1",
     "output_path": "processed-retail-data/"
 }
 ```
