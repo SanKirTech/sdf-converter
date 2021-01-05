@@ -24,5 +24,5 @@ export GOOGLE_APPLICATION_CREDENTIALS=/path/to/creds.json
 4. Run the script with
 
 ```bash
-python3 batch.py /path/to/config.json
+python3 -m sdf /path/to/config.json
 ```
