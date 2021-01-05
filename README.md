@@ -1,18 +1,20 @@
-# Steps to run script
+# Steps to run
 
-1. Install google-cloud-storage Python library with
+1. Install sankir-sdf
    
 ```bash
-pip install -r requirements.txt
+pip3 install sankir-sdf
 ```
 
-2. Create a `config.json` containing following three fields:
-   
+2. Create a `config.json` containing following fields:
+
 ```json
 {
-    "bucket_name": "sankir-storage-prospark",
-    "input_path": "raw-retail-data/q1",
-    "output_path": "processed-retail-data/"
+    "bucket_name":"sankir-storage-prospark",
+    "input_path":"data/retail-data/q1",
+    "output_path":"processed-retail-data/",
+    "bigquery_table_name": "recon.reconciliation",
+    "reprocess": true
 }
 ```
 
@@ -21,8 +23,8 @@ pip install -r requirements.txt
 export GOOGLE_APPLICATION_CREDENTIALS=/path/to/creds.json
 ```
 
-4. Run the script with
+4. Run the program with:
 
 ```bash
-python3 -m sdf /path/to/config.json
+sankir-sdf /path/to/config.json
 ```
