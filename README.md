@@ -23,7 +23,9 @@ pip3 install sankir-sdf
 export GOOGLE_APPLICATION_CREDENTIALS=/path/to/creds.json
 ```
 
-4. Run the program with:
+4. export PATH=$PATH:$HOME/.local/bin
+
+5. Run the program with:
 
 ```bash
 sankir-sdf /path/to/config.json
