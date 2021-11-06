@@ -1,10 +1,10 @@
 import io
-import pandas
 import json
 import logging
-from google.cloud import storage, bigquery
 
-from sdf.utils import get_fields, get_time, get_output_path
+import pandas
+
+from sdf.utils import get_fields, get_output_path, get_time
 
 
 class SDF:
@@ -72,12 +72,10 @@ class SDF:
 
     @staticmethod
     def process(data, metadata):
-        f = io.StringIO(data.decode("utf-8"))
-        fields = get_fields(data)
-        parsed_data = pandas.read_csv(f)
+        parsed_data = pandas.read_csv(io.StringIO(data.decode("utf-8")))
 
         updated_data = list()
-        for idx, row in parsed_data.iterrows():
+        for _, row in parsed_data.iterrows():
             updated_data.append({"_m": metadata, "_p": {"data": dict(row)}})
         return updated_data
 
