@@ -6,13 +6,9 @@ from google.cloud import storage, bigquery
 import boto3
 from sdf.aws_sdf import AWS_SDF
 
-from sdf.utils import get_config
+from sdf.utils import get_config, Cloud
 from sdf.gcp_sdf import GCP_SDF
 
-class Cloud:
-    AWS = "AWS"
-    GCP = "GCP"
-    AZURE = "AZURE"
 
 def main():
     # Check if env variable is set

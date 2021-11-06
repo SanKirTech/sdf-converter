@@ -43,3 +43,8 @@ def process(data, metadata):
     for _, row in parsed_data.iterrows():
         updated_data.append({"_m": metadata, "_p": {"data": dict(row)}})
     return updated_data
+
+class Cloud:
+    AWS = "AWS"
+    GCP = "GCP"
+    AZURE = "AZURE"
