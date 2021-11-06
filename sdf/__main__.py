@@ -12,6 +12,10 @@ from sdf.gcp_sdf import GCP_SDF
 
 def main():
     # Check if env variable is set
+    if len(sys.argv) < 2:
+        print("Provide path to config.json as argument.")
+        os._exit(-1)
+
     config = get_config(sys.argv[1])
     cloud = config.get("cloud")
 
@@ -19,9 +23,6 @@ def main():
         print("Please set 'GOOGLE_APPLICATION_CREDENTIALS' environment variable")
         os._exit(-1)
 
-    if len(sys.argv) < 2:
-        print("Provide path to config.json as argument.")
-        os._exit(-1)
 
     if cloud == Cloud.AWS:
         aws_main(config)

@@ -27,7 +27,7 @@ class AWS_SDF:
 
     def update_storage(self):
         """Stores the error into sink"""
-       
+
         file_contents = self.blob.get()['Body'].read()
 
         metadata = {
