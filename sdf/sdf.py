@@ -4,7 +4,7 @@ import logging
 
 import pandas
 
-from sdf.utils import get_fields, get_output_path, get_time
+from sdf.utils import get_output_path, get_time
 
 
 class SDF:
