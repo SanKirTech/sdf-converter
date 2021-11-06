@@ -7,35 +7,24 @@ import pandas
 from sdf.utils import get_output_path, get_time
 
 
-class SDF:
-    def __init__(self, config, blob, storage_client, bigquery_client):
+class AWS_SDF:
+    def __init__(self, config, blob, s3_resource):
         self.config = config
         self.input_path = config["input_path"]
         self.output_path = config["output_path"]
         self.bucket_name = config["bucket_name"]
         self.blob = blob
 
-        self.table_name = config["bigquery_table_name"]
-        self.reprocess = config.get("reprocess", False)
-        self.src = "gcs"
+        self.src = "aws"
 
-        self.storage_client = storage_client
-        self.bigquery_client = bigquery_client
+        self.s3_resource = s3_resource
+        self.processed_data = None
 
     def update_storage(self):
-        bucket = self.storage_client.get_bucket(self.bucket_name)
+        """Stores the error into sink"""
+        bucket = self.s3_resource.Bucket(self.bucket_name)
         if self.blob is None:
             logging.error(f"input_path: {self.input_path} does not exist")
-            return
-
-        # Check if blob has already been processed in the bigquery db
-        present_in_recon = bool(list(
-            self.bigquery_client.query(
-                f"""SELECT src_dtls from `pro-spark.recon.reconciliation` where src_dtls = "{self.blob.public_url}" """
-            )
-        ))
-        if not self.reprocess and present_in_recon:
-            print("File already processed. Skipping...")
             return
 
         file_contents = self.blob.download_as_string()
@@ -47,12 +36,12 @@ class SDF:
             "src_dtls": self.blob.public_url,
         }
 
-        self.processed_data = SDF.process(file_contents, metadata)
+        self.processed_data = GCP_SDF.process(file_contents, metadata)
 
         # Create destination blob
         dest_blob = bucket.blob(get_output_path(self.blob.name, self.output_path))
         dest_blob.upload_from_string(
-            SDF.custom_json_dump(self.processed_data), content_type="application/json"
+            GCP_SDF.custom_json_dump(self.processed_data), content_type="application/json"
         )
         return True
 
@@ -72,6 +61,7 @@ class SDF:
 
     @staticmethod
     def process(data, metadata):
+        """Adds metadata tags"""
         parsed_data = pandas.read_csv(io.StringIO(data.decode("utf-8")))
 
         updated_data = list()
@@ -88,10 +78,12 @@ class SDF:
         return "\n".join(list(map(json.dumps,  processed_data)))
 
     def run(self):
+        """Entrypoint"""
         res = self.update_storage()
         if res:
             self.update_table()
 
     @property
     def received_timestamp(self):
+        """Convert timestamp to string"""
         return self.blob.time_created.strftime("%Y-%m-%d %X")

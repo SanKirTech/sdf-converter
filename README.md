@@ -1,4 +1,4 @@
-# Steps to run
+# Steps to run (GCP)
 
 1. Install sankir-sdf
    
