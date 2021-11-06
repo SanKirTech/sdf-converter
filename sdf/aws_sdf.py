@@ -7,7 +7,7 @@ import pandas
 from botocore.exceptions import ClientError
 
 
-from sdf.utils import get_output_path, get_time, process
+from sdf.utils import get_output_path, get_time, process, custom_json_dump
 
 
 class AWS_SDF:
@@ -37,7 +37,7 @@ class AWS_SDF:
             "src_dtls": self.src_details,
         }
         self.processed_data = process(file_contents, metadata)
-        self.bucket.put_object(Body=AWS_SDF.custom_json_dump(self.processed_data), Key=get_output_path(self.blob._key, self.output_path))
+        self.bucket.put_object(Body=custom_json_dump(self.processed_data), Key=get_output_path(self.blob._key, self.output_path))
         return True
 
     def update_table(self):
@@ -68,14 +68,6 @@ class AWS_SDF:
             recon.put(Body=data_df.to_csv(index=False).encode())
         else:
             recon.put(Body=pandas.read_csv(existing_csv_data).append(data_df).to_csv(index=False).encode())
-
-    @staticmethod
-    def custom_json_dump(processed_data):
-        """
-        Takes in processed data and returns a custom JSON format with
-        each line representing valid JSON.
-        """
-        return "\n".join(list(map(json.dumps,  processed_data)))
 
     def run(self):
         """Entrypoint"""

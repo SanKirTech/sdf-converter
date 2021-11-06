@@ -4,7 +4,7 @@ import logging
 
 import pandas
 
-from sdf.utils import get_output_path, get_time, process
+from sdf.utils import get_output_path, get_time, process, custom_json_dump
 
 
 class GCP_SDF:
@@ -44,7 +44,7 @@ class GCP_SDF:
         # Create destination blob
         dest_blob = bucket.blob(get_output_path(self.blob.name, self.output_path))
         dest_blob.upload_from_string(
-            GCP_SDF.custom_json_dump(self.processed_data), content_type="application/json"
+            custom_json_dump(self.processed_data), content_type="application/json"
         )
         return True
 
@@ -61,14 +61,6 @@ class GCP_SDF:
         ]
         print("Inserting data into recon table")
         self.bigquery_client.insert_rows_json(self.table_name, data)
-
-    @staticmethod
-    def custom_json_dump(processed_data):
-        """
-        Takes in processed data and returns a custom JSON format with
-        each line representing valid JSON.
-        """
-        return "\n".join(list(map(json.dumps,  processed_data)))
 
     def run(self):
         """Entrypoint"""

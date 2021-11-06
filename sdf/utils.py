@@ -44,6 +44,13 @@ def process(data, metadata):
         updated_data.append({"_m": metadata, "_p": {"data": dict(row)}})
     return updated_data
 
+def custom_json_dump(processed_data):
+    """
+    Takes in processed data and returns a custom JSON format with
+    each line representing valid JSON.
+    """
+    return "\n".join(list(map(json.dumps,  processed_data)))
+
 class Cloud:
     AWS = "AWS"
     GCP = "GCP"
