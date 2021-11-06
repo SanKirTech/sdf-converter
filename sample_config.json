@@ -1,0 +1,15 @@
+{
+    "cloud": "GCP",
+    "bucket_name":"sankir-storage-prospark",
+    "input_path":"data/retail-data/q1/2011-01-12.csv",
+    "output_path":"processed-retail-data/test1/",
+    "reconciliation": "recon.reconciliation"
+}
+
+{
+    "cloud": "AWS",
+    "bucket_name":"retail-sankir",
+    "input_path":"data/retail-data/q2/",
+    "output_path":"processed-retail-data/q2/",
+    "reconciliation": "recon/reconciliation.csv"
+}
