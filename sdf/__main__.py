@@ -37,7 +37,7 @@ def main():
 
 def aws_main(config):
     client = boto3.client('s3')
-    s3 = boto3.resource('s3')
+    s3_resource = boto3.resource('s3')
 
     bucket_name = config["bucket_name"]
     objects = client.list_objects_v2(
@@ -51,14 +51,14 @@ def aws_main(config):
         print("Provided bucket_name and input_path contain no objects", file=sys.stderr)
         return
 
-    print(f"Found {len(contents) - 1} blobs. Processing...")
+    contents = list(filter(lambda x: x.get("Size") != 0, contents))
+    print(f"Found {len(contents)} blobs. Processing...")
 
     for index, blob in enumerate(contents):
-        if blob.get("Size") == 0:
-            continue
-        print(f"Processing {index + 1} of {len(contents)}: {blob.name}")
-        s3_object = s3.Object(bucket_name, blob.get("Key"))
-        sdf = AWS_SDF(config, s3_object, s3)
+        key = blob.get("Key")
+        print(f"Processing {index + 1} of {len(contents)}: {key}")
+        s3_object = s3_resource.Object(bucket_name, key)
+        sdf = AWS_SDF(config, s3_object, s3_resource, client)
         sdf.run()
 
 

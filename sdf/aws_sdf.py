@@ -1,14 +1,17 @@
 import io
 import json
 import logging
+from os.path import join
 
 import pandas
+from botocore.exceptions import ClientError
 
-from sdf.utils import get_output_path, get_time
+
+from sdf.utils import get_output_path, get_time, process
 
 
 class AWS_SDF:
-    def __init__(self, config, blob, s3_resource):
+    def __init__(self, config, blob, s3_resource, s3_client):
         self.config = config
         self.input_path = config["input_path"]
         self.output_path = config["output_path"]
@@ -18,31 +21,23 @@ class AWS_SDF:
         self.src = "aws"
 
         self.s3_resource = s3_resource
+        self.s3_client = s3_client
+        self.bucket = self.s3_resource.Bucket(self.bucket_name)
         self.processed_data = None
 
     def update_storage(self):
         """Stores the error into sink"""
-        bucket = self.s3_resource.Bucket(self.bucket_name)
-        if self.blob is None:
-            logging.error(f"input_path: {self.input_path} does not exist")
-            return
-
-        file_contents = self.blob.download_as_string()
+       
+        file_contents = self.blob.get()['Body'].read()
 
         metadata = {
             "_rt": self.received_timestamp,
             "_src": self.src,
             "_o": "",
-            "src_dtls": self.blob.public_url,
+            "src_dtls": self.src_details,
         }
-
-        self.processed_data = GCP_SDF.process(file_contents, metadata)
-
-        # Create destination blob
-        dest_blob = bucket.blob(get_output_path(self.blob.name, self.output_path))
-        dest_blob.upload_from_string(
-            GCP_SDF.custom_json_dump(self.processed_data), content_type="application/json"
-        )
+        self.processed_data = process(file_contents, metadata)
+        self.bucket.put_object(Body=AWS_SDF.custom_json_dump(self.processed_data), Key=get_output_path(self.blob._key, self.output_path))
         return True
 
     def update_table(self):
@@ -50,24 +45,29 @@ class AWS_SDF:
         data = [
             {
                 "src": self.src,
-                "src_dtls": self.blob.public_url,
+                "src_dtls": self.src_details,
                 "record_count": len(self.processed_data),
                 "received_timestamp": self.received_timestamp,
                 "processed_timestamp": get_time(),
             }
         ]
-        print("Inserting data into recon table")
-        self.bigquery_client.insert_rows_json(self.table_name, data)
+        data_df = pandas.DataFrame(data)
+        recon = None
+        existing_csv_data = None
+        key = self.config.get("reconciliation")
+        try:
+            recon = self.s3_resource.Object(self.bucket_name, key)
+            existing_csv_data = recon.get()['Body']
+        except ClientError as e:
+            if e.response['Error']['Code'] == 'NoSuchKey':
+                pass
+            else:
+                raise
 
-    @staticmethod
-    def process(data, metadata):
-        """Adds metadata tags"""
-        parsed_data = pandas.read_csv(io.StringIO(data.decode("utf-8")))
-
-        updated_data = list()
-        for _, row in parsed_data.iterrows():
-            updated_data.append({"_m": metadata, "_p": {"data": dict(row)}})
-        return updated_data
+        if existing_csv_data is None:
+            recon.put(Body=data_df.to_csv(index=False).encode())
+        else:
+            recon.put(Body=pandas.read_csv(existing_csv_data).append(data_df).to_csv(index=False).encode())
 
     @staticmethod
     def custom_json_dump(processed_data):
@@ -86,4 +86,8 @@ class AWS_SDF:
     @property
     def received_timestamp(self):
         """Convert timestamp to string"""
-        return self.blob.time_created.strftime("%Y-%m-%d %X")
+        return self.blob.last_modified.strftime("%Y-%m-%d %X")
+
+    @property
+    def src_details(self):
+        return self.blob._bucket_name + '/' + self.blob._key

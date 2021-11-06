@@ -3,6 +3,7 @@ import io
 import json
 import os
 import sys
+import pandas
 from datetime import datetime
 
 
@@ -21,7 +22,7 @@ def get_filename(path):
 
 def get_output_path(blob_name, output_path):
     filename = get_filename(blob_name)
-    op_path = os.path.join(output_path, f"{filename}.json")
+    op_path = os.path.join(output_path, f"{filename}.json").replace("\\", "/")
     print(f"Writing to {op_path}")
     return op_path
 
@@ -32,3 +33,13 @@ def get_time():
 
 def get_fields(data):
     return data.splitlines()[0].decode("utf-8").split(",")
+
+
+def process(data, metadata):
+    """Adds metadata tags"""
+    parsed_data = pandas.read_csv(io.StringIO(data.decode("utf-8")))
+
+    updated_data = list()
+    for _, row in parsed_data.iterrows():
+        updated_data.append({"_m": metadata, "_p": {"data": dict(row)}})
+    return updated_data

@@ -10,10 +10,11 @@ pip3 install sankir-sdf
 
 ```json
 {
+    "cloud": "AWS|GCP|AZURE",
     "bucket_name":"sankir-storage-prospark",
     "input_path":"data/retail-data/q1",
     "output_path":"processed-retail-data/",
-    "bigquery_table_name": "recon.reconciliation",
+    "reconciliation": "recon.reconciliation",
     "reprocess": true
 }
 ```

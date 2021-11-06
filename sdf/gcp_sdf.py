@@ -4,7 +4,7 @@ import logging
 
 import pandas
 
-from sdf.utils import get_output_path, get_time
+from sdf.utils import get_output_path, get_time, process
 
 
 class GCP_SDF:
@@ -15,7 +15,7 @@ class GCP_SDF:
         self.bucket_name = config["bucket_name"]
         self.blob = blob
 
-        self.table_name = config["bigquery_table_name"]
+        self.table_name = config["reconciliation"]
         self.reprocess = config.get("reprocess", False)
         self.src = "gcs"
 
@@ -39,7 +39,7 @@ class GCP_SDF:
             "src_dtls": self.blob.public_url,
         }
 
-        self.processed_data = GCP_SDF.process(file_contents, metadata)
+        self.processed_data = process(file_contents, metadata)
 
         # Create destination blob
         dest_blob = bucket.blob(get_output_path(self.blob.name, self.output_path))
@@ -61,16 +61,6 @@ class GCP_SDF:
         ]
         print("Inserting data into recon table")
         self.bigquery_client.insert_rows_json(self.table_name, data)
-
-    @staticmethod
-    def process(data, metadata):
-        """Adds metadata tags"""
-        parsed_data = pandas.read_csv(io.StringIO(data.decode("utf-8")))
-
-        updated_data = list()
-        for _, row in parsed_data.iterrows():
-            updated_data.append({"_m": metadata, "_p": {"data": dict(row)}})
-        return updated_data
 
     @staticmethod
     def custom_json_dump(processed_data):
