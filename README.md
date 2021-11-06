@@ -14,8 +14,7 @@ pip3 install sankir-sdf
     "bucket_name":"sankir-storage-prospark",
     "input_path":"data/retail-data/q1",
     "output_path":"processed-retail-data/",
-    "reconciliation": "recon.reconciliation",
-    "reprocess": true
+    "reconciliation": "recon.reconciliation"
 }
 ```
 

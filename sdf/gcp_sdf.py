@@ -16,7 +16,6 @@ class GCP_SDF:
         self.blob = blob
 
         self.table_name = config["reconciliation"]
-        self.reprocess = config.get("reprocess", False)
         self.src = "gcs"
 
         self.storage_client = storage_client
