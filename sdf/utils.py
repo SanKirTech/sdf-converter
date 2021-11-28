@@ -6,6 +6,7 @@ import sys
 import pandas
 from datetime import datetime
 
+AZURE_STORAGE_CONNECTION_STRING = "AZURE_STORAGE_CONNECTION_STRING"
 
 def get_config(path):
     if not os.path.exists(path):

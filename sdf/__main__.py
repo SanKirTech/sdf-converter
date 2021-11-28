@@ -3,11 +3,13 @@ import sys
 import json
 
 from google.cloud import storage, bigquery
+from azure.storage.blob import BlobServiceClient
 import boto3
 from sdf.aws_sdf import AWS_SDF
 
-from sdf.utils import get_config, Cloud
+from sdf.utils import get_config, Cloud, AZURE_STORAGE_CONNECTION_STRING
 from sdf.gcp_sdf import GCP_SDF
+from sdf.azure_sdf import AZURE_SDF
 
 
 def main():
@@ -22,14 +24,18 @@ def main():
     if not os.environ.get("GOOGLE_APPLICATION_CREDENTIALS") and cloud == Cloud.GCP:
         print("Please set 'GOOGLE_APPLICATION_CREDENTIALS' environment variable")
         os._exit(-1)
-
+    elif cloud == Cloud.AZURE and not os.environ.get(AZURE_STORAGE_CONNECTION_STRING):
+        print("Please set '{}' environment variable".format(AZURE_STORAGE_CONNECTION_STRING))
+        os._exit(-1)
 
     if cloud == Cloud.AWS:
         aws_main(config)
     elif cloud == Cloud.GCP:
         gcp_main(config)
     elif cloud == Cloud.AZURE:
-        raise NotImplementedError("Planned for future")
+        azure_main(config)     
+    else:
+        raise Exception("Unknown cloud type: {}".format(cloud))
 
 
 def aws_main(config):
@@ -72,6 +78,18 @@ def gcp_main(config):
     for index, blob in enumerate(all_blobs):
         print(f"Processing {index + 1} of {len(all_blobs)}: {blob.name}")
         sdf = GCP_SDF(config, blob, storage_client, bigquery_client)
+        sdf.run()
+
+
+def azure_main(config):
+    credential = os.environ[AZURE_STORAGE_CONNECTION_STRING]
+    service = BlobServiceClient.from_connection_string(credential)
+    container_client = service.get_container_client(config.get("container"))
+    blobs = list(container_client.list_blobs(name_starts_with=config.get("input_path")))
+    print(f"Found {len(blobs)} blobs. Processing...")
+    for index, blob in enumerate(blobs):
+        print(f"Processing {index + 1} of {len(blobs)}: {blob.name}")
+        sdf = AZURE_SDF(config, blob, container_client)
         sdf.run()
 
 

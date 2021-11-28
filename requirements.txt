@@ -2,3 +2,4 @@ google-cloud-storage
 google-cloud-bigquery
 boto3
 pandas
+azure-storage-blob==12.9.0
