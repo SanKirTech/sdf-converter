@@ -7,7 +7,7 @@ from azure.storage.blob import BlobServiceClient
 import boto3
 from sdf.aws_sdf import AWS_SDF
 
-from sdf.utils import get_config, Cloud
+from sdf.utils import get_config, Cloud, AZURE_STORAGE_CONNECTION_STRING
 from sdf.gcp_sdf import GCP_SDF
 from sdf.azure_sdf import AZURE_SDF
 
@@ -24,8 +24,8 @@ def main():
     if not os.environ.get("GOOGLE_APPLICATION_CREDENTIALS") and cloud == Cloud.GCP:
         print("Please set 'GOOGLE_APPLICATION_CREDENTIALS' environment variable")
         os._exit(-1)
-    elif cloud == Cloud.AZURE and not os.environ.get("AZURE_CONNECTION_STRING"):
-        print("Please set 'AZURE_CONNECTION_STRING' environment variable")
+    elif cloud == Cloud.AZURE and not os.environ.get(AZURE_STORAGE_CONNECTION_STRING):
+        print("Please set '{}' environment variable".format(AZURE_STORAGE_CONNECTION_STRING))
         os._exit(-1)
 
     if cloud == Cloud.AWS:
@@ -82,7 +82,7 @@ def gcp_main(config):
 
 
 def azure_main(config):
-    credential = os.environ.get("AZURE_CONNECTION_STRING")
+    credential = os.environ[AZURE_STORAGE_CONNECTION_STRING]
     service = BlobServiceClient.from_connection_string(credential)
     container_client = service.get_container_client(config.get("container"))
     blobs = list(container_client.list_blobs(name_starts_with=config.get("input_path")))
