@@ -9,7 +9,7 @@
 {
     "cloud": "AWS",
     "bucket_name":"retail-sankir",
-    "input_path":"data/retail-data/q1/2011-01-12.csv",
+    "input_path":"data/retail_data/q1/2011-01-12.csv",
     "output_path":"processed-retail-data/q1/",
     "reconciliation": "recon/reconciliation.csv"
 }
