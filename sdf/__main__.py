@@ -82,7 +82,6 @@ def gcp_main(config):
 
 
 def azure_main(config):
-    print("HELLOOOO")
     credential = os.environ[AZURE_STORAGE_CONNECTION_STRING]
     service = BlobServiceClient.from_connection_string(credential)
     input_container_client = service.get_container_client(config.get("input_container"))
