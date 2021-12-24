@@ -82,14 +82,16 @@ def gcp_main(config):
 
 
 def azure_main(config):
+    print("HELLOOOO")
     credential = os.environ[AZURE_STORAGE_CONNECTION_STRING]
     service = BlobServiceClient.from_connection_string(credential)
-    container_client = service.get_container_client(config.get("container"))
-    blobs = list(container_client.list_blobs(name_starts_with=config.get("input_path")))
+    input_container_client = service.get_container_client(config.get("input_container"))
+    output_container_client = service.get_container_client(config.get("output_container"))
+    blobs = list(input_container_client.list_blobs(name_starts_with=config.get("input_path")))
     print(f"Found {len(blobs)} blobs. Processing...")
     for index, blob in enumerate(blobs):
         print(f"Processing {index + 1} of {len(blobs)}: {blob.name}")
-        sdf = AZURE_SDF(config, blob, container_client)
+        sdf = AZURE_SDF(config, blob, input_container_client, output_container_client)
         sdf.run()
 
 

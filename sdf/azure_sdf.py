@@ -10,7 +10,7 @@ from sdf.utils import get_output_path, get_time, process, custom_json_dump
 
 
 class AZURE_SDF:
-    def __init__(self, config, blob: BlobProperties, container_client: ContainerClient):
+    def __init__(self, config, blob: BlobProperties, input_container_client: ContainerClient, output_container_client: ContainerClient):
         self.config = config
         self.input_path = config["input_path"]
         self.output_path = config["output_path"]
@@ -19,12 +19,13 @@ class AZURE_SDF:
 
         self.src = "azure"
 
-        self.container_client = container_client
+        self.input_container_client = input_container_client
+        self.output_container_client = output_container_client
 
     def update_storage(self):
         """Stores the error into sink"""
 
-        file_contents = self.container_client.download_blob(self.blob).readall()
+        file_contents = self.input_container_client.download_blob(self.blob).readall()
 
         metadata = {
             "_rt": self.received_timestamp,
@@ -33,7 +34,7 @@ class AZURE_SDF:
             "src_dtls": self.src_details,
         }
         self.processed_data = process(file_contents, metadata)
-        self.container_client.upload_blob(
+        self.output_container_client.upload_blob(
             name=get_output_path(self.blob.name, self.output_path),
             data=io.BytesIO(custom_json_dump(self.processed_data).encode()),
             overwrite=True
@@ -55,15 +56,15 @@ class AZURE_SDF:
         recon = None
         existing_csv_data = None
         reconciliation_filename = self.config.get("reconciliation")
-        recon: BlobClient = self.container_client.get_blob_client(reconciliation_filename)
+        recon: BlobClient = self.output_container_client.get_blob_client(reconciliation_filename)
 
         if not recon.exists():
             updated_data = io.BytesIO(data_df.to_csv(index=False).encode())
         else:
-            existing_csv_data = io.BytesIO(self.container_client.download_blob(reconciliation_filename).readall())
+            existing_csv_data = io.BytesIO(self.output_container_client.download_blob(reconciliation_filename).readall())
             updated_data = io.BytesIO(pandas.read_csv(existing_csv_data).append(data_df).to_csv(index=False).encode())
 
-        self.container_client.upload_blob(
+        self.output_container_client.upload_blob(
             name=reconciliation_filename,
             data=updated_data,
             overwrite=True
