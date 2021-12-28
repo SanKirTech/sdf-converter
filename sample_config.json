@@ -17,8 +17,9 @@
 {
     "cloud": "AZURE",
     "bucket_name":"retailsankir",
-    "container":"data",
-    "input_path":"retail-data/q1/2011-01-12.csv",
-    "output_path":"processed-retail-data/q1/",
+    "input_container":"data",
+    "output_container":"processed-retail-data",
+    "input_path":"retail-data/q2/2011-04-01.csv",
+    "output_path":"q2/",
     "reconciliation": "recon/reconciliation.csv"
 }
