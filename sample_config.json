@@ -1,4 +1,4 @@
-# GCP CONFIG BEGINS ##
+// GCP CONFIG BEGINS ##
 {
     "cloud": "GCP",
     "bucket_name":"sankir-storage-prospark",
@@ -6,9 +6,9 @@
     "output_path":"processed-retail-data/q1/",
     "reconciliation": "recon.reconciliation"
 }
-# GCP CONFIG ENDS ##
+// GCP CONFIG ENDS ##
 
-# AWS CONFIG BEGINS ##
+// AWS CONFIG BEGINS ##
 {
     "cloud": "AWS",
     "bucket_name":"retail-sankir",
@@ -16,9 +16,9 @@
     "output_path":"processed-retail-data/q1/",
     "reconciliation": "recon/reconciliation.csv"
 }
-# AWS COFIG ENDS ##
+// AWS COFIG ENDS ##
 
-# AZURE CONFIG BEGINS ##
+// AZURE CONFIG BEGINS ##
 {
     "cloud": "AZURE",
     "bucket_name":"retailsankir",
@@ -28,4 +28,4 @@
     "output_path":"q2/",
     "reconciliation": "recon/reconciliation.csv"
 }
-# AZURE CONFIG ENDS ##
+// AZURE CONFIG ENDS ##
